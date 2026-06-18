@@ -1,0 +1,43 @@
+stages:
+  - version-check
+  - build-docker-file
+  - test-job
+  - push-docker-image
+  - deploy
+
+version-checks:
+  stage: version-check
+    script: 
+      - docker --version
+    tags:
+      - dev
+
+docker-file:
+  stage: build-docker-file
+    script: 
+      - docker build -t omkarmane116/notes-app .
+      - docker images
+    tags: 
+      - dev
+
+test_job:
+  stage: test-job
+    script:
+      - echo "testing ...."
+    tags: 
+      - dev
+
+push-image:
+  stage: push-docker-image
+    script:
+      - docker "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER"
+      - docker push omkarmane116/notes-app:latest
+    tags:
+      - dev
+
+deploy_job:
+  stage: deploy
+    script: 
+      - docker run -itd --name notes-app -p 8001:8001 omkarmane116/notes-app:latest
+    tags:
+      - dev
